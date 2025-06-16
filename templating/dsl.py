@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Iterable
 
 @dataclass
 class Line:
@@ -70,4 +70,23 @@ def parse(text: str) -> List[Feature]:
         features.append(Feature(start, segments))
         i += 1
     return features
+
+
+def serialize(features: Iterable[Feature]) -> str:
+    """Serialize a list of features back into the template DSL."""
+    lines: List[str] = []
+    for feature in features:
+        lines.append(f"FEATURE {feature.start[0]} {feature.start[1]}")
+        for seg in feature.segments:
+            if isinstance(seg, Line):
+                lines.append(f"LINE {seg.x} {seg.y}")
+            elif isinstance(seg, Spline):
+                coord_parts = " ".join(f"{x} {y}" for x, y in seg.points)
+                lines.append(f"SPLINE {coord_parts}")
+            elif isinstance(seg, Arc):
+                lines.append(
+                    f"ARC {seg.cx} {seg.cy} {seg.radius} {seg.start_angle} {seg.end_angle}"
+                )
+        lines.append("END")
+    return "\n".join(lines)
 

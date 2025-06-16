@@ -1,5 +1,5 @@
 import unittest
-from templating.dsl import parse, Line, Spline, Arc, Feature
+from templating.dsl import parse, serialize, Line, Spline, Arc, Feature
 
 class TestDSL(unittest.TestCase):
     def test_parse(self):
@@ -21,6 +21,17 @@ class TestDSL(unittest.TestCase):
             features[1].segments[1],
             Spline([(0.0, 0.0), (1.0, 1.0), (2.0, 0.0)]),
         )
+
+    def test_serialize_roundtrip(self):
+        text = (
+            "FEATURE 0 0\n"
+            "LINE 10 0\n"
+            "LINE 10 10\n"
+            "END\n"
+        )
+        features = parse(text)
+        out = serialize(features)
+        self.assertEqual(parse(out), features)
 
 if __name__ == '__main__':
     unittest.main()
